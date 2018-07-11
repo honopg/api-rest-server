@@ -1,0 +1,33 @@
+{
+  "name": "server-app",
+  "version": "1.0.0",
+  "description": "Node.js - mongoDB sample a",
+  "main": "server.js",
+  "dependencies": {
+    "bcrypt-nodejs": "0.0.3",
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.18.3",
+    "crypto": "^1.0.1",
+    "express": "^4.16.3",
+    "jwt-simple": "^0.5.1",
+    "moment": "^2.22.2",
+    "mongoose": "^5.2.1"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo \" Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/honopg/nodejs-ex.git"
+  },
+  "author": "Honorio Prieto",
+  "license": "MIT",
+  "bugs": {
+    "url": "http://github.com/honopg/nodejs-ex/issues"
+  },
+  "homepage": "http://github.com/honopg/nodejs-ex",
+  "devDependencies": {
+    "nodemon": "^1.17.5"
+  }
+}
