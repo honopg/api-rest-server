@@ -16,7 +16,9 @@ const UserSchema = Schema({
 	created_at		: String,
 	temp_password	: String,
 	temp_password_time	: String,
-	publickey : String
+	publickey : String,
+	active : Number,
+	code_act : {type: String/*, select: false*/}
 	
 });
 

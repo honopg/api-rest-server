@@ -59,6 +59,17 @@ api.get('/private',auth, function(req, res) {
 api.post('/signup', userCtrl.signUp)
 api.post('/signin', userCtrl.signIn)
 
+api.get('/verification/:email', function (req, res){
+	res.end('<html><body>'
+		      + '<h1>Your account has been activated and verified!</h1>'
+		      + '</body></html>');
+	const a = req.params.email;
+	const b = new Buffer(a, 'base64')
+	const s = b.toString();
+	console.log(s)
+	
+})
+
 api.get('/', function(req, res) {
 		//res.render("index.html")
         res.end("Node-Android")
@@ -67,8 +78,9 @@ api.get('/', function(req, res) {
 api.post('/login',function(req,res){
         const email = req.body.email;
         const password = req.body.password;
+		const code_act = req.body.code_act;
  
-        login.login(email,password,function (found) {
+        login.login(email,password, code_act, function (found) {
             console.log(found)
             res.json(found)
 		});
