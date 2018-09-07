@@ -10,7 +10,9 @@ const subject = require('../models/subjects');
 exports.saveSubj = function(id_user,subj,grouppl,year,profname,profemail,callback) {
 
 
-	user.find({token: id_user},function(err,users){
+	//user.find({token: id_user},function(err,users){
+	//user.findById(id_user, function(err,users){
+	user.find({'_id': id_user},function(err,users){
 	subject.find({subj: subj/*.replace(/\s/g, "")*/, User:users[0]._id},function(err,subjects){ // Buscamos asignatura con la id del usuario en linea
 	
 		if(subjects.length == 0 && users.length != 0){

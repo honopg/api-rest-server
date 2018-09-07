@@ -10,6 +10,8 @@ const setStudent = require('../controllers/setStudent');
 const savekeys = require ('../controllers/saveKeys');
 const auth = require('../middelwares/auth');
 const userCtrl = require('../controllers/user');
+const savepicture = require ('../controllers/saveProfilePicture');
+const saveAssistance = require ('../controllers/saveAssistance');
 
 
 //Return all users in the DB
@@ -51,6 +53,12 @@ api.get('/subjectsID', queriesCtrl.findAllSubjectsUserID)
 
 //Return a list of all subjects associates to users
 api.get('/subjects', queriesCtrl.findAllSubjectsUser)
+
+//Return the profile from an user with his ID in the DB
+api.post('/users/getProfile/:id', queriesCtrl.findUserProfile)
+
+//Retutn all the assistances from a user in a subject with his ID in the BD
+api.post('/users/assistance/:id/:subjname', queriesCtrl.findUserAssistances)
 
 api.get('/private',auth, function(req, res) {
 	res.stauts(200).send({message: 'You have access'})
@@ -115,7 +123,7 @@ api.post('/setSubjUser',function(req,res){
 		const 	id_user = req.body.id_user;
 		const 	subj = req.body.subj;
 		const	grouppl = req.body.grouppl;
-		const	year = req.body.groupte;
+		const	year = req.body.year;
 		const	profname = req.body.profname;
 		const	profemail = req.body.profemail;
 
@@ -124,7 +132,33 @@ api.post('/setSubjUser',function(req,res){
             res.json(found);
 		});
 });
+
+api.post('/saveUserProfilePicture',function(req,res){
+		const identUser = req.body.identUser;
+        const picture = req.body.picture;
+		
+        savepicture.savepicture(identUser,picture,function (found) {
+            console.log(found);
+            res.json(found);
+		});
+});
 	
+api.post('/saveAssistance',function(req,res){
+	
+		const 	id_userS = req.body.id_userS;
+		const 	id_userP = req.body.id_userP;
+		const 	subjname = req.body.subjname;
+		const	session = req.body.session;
+		const	grouppl = req.body.grouppl;
+		const	date = req.body.date;
+		const	useremail = req.body.useremail;
+		const	verify = req.body.verify;
+
+		saveAssistance.saveAssistance(id_userS,id_userP,subjname,session,grouppl,date,useremail,verify,function (found) {
+            console.log(found);
+            res.json(found);
+		});
+});
 	
 module.exports = api ;
 

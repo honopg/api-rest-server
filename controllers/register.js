@@ -34,7 +34,8 @@ exports.register = function(name,lastname,typeuser,email,password,callback) {
 			email: email,
 			typeuser: typeuser,
 			hashed_password: hash,
-			created_at: new Date(),
+			created_at: new Date().toUTCString(),
+			//created_at: new Date().toDateString(),
 			active : 0,
 			code_act : hash_code
 		});

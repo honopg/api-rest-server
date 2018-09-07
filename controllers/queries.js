@@ -3,6 +3,7 @@
 const mongoose = require('mongoose');
 const user = require('../models/users');
 const subject = require('../models/subjects');
+const record = require('../models/records');
 
 
 //GET - Return all users in the DB
@@ -90,10 +91,10 @@ exports.findUserSubjs = (req, res) => {
 exports.findUsersByPlGroupSubj = (req, res) => {
 	const subj = req.params.subj
 	const group = req.params.group
-	const array = []
+	var array = []
 	array = group.split(";")
 	//var s = subj.replace(/(.)([A-Z])/g, "$1 &2");
-	const s = subj.replace(/([A-Z])/g, " $1").trim();
+	var s = subj.replace(/([A-Z])/g, " $1").trim();
 
 	console.log('POST /users/list/${subj}/${group}')
 
@@ -131,7 +132,7 @@ exports.getPublickeyUser = (req, res) => {
 	const id = req.params.id
 	console.log('POST /users/publickey/${id}')
 	
-	user.findById(id, {'_id':0,'name':0,'lastname':0,'email':0,'typeuser':0,'picture':0,'__v':0,'password':0}, function(err, pbkey){
+	user.findById(id, {'_id':0,'name':0,'lastname':0,'email':0,'typeuser':0,'picture':0,'__v':0,'hashed_password':0,'created_at':0,'active':0,'code_act':0}, function(err, pbkey){
 	//user.findById(id, {'_id':0,'token':0,'name':0,'lastname':0,'email':0,'typeuser':0,'salt':0,'__v':0,'hashed_password':0,}, function(err, pbkey){
 	 
 		if (err) return res.status(500).send(err.message)
@@ -149,7 +150,7 @@ exports.getPublickeyUserByEmail = (req, res) => {
 	const e = email+s;
 	console.log('POST /users/publickeyemail/${email}')
 	
-	user.findOne({email:e}, {'_id':0,'name':0,'lastname':0,'email':0,'typeuser':0,'picture':0,'__v':0,'password':0}, function(err, pbkey){
+	user.findOne({email:e}, {'_id':0,'name':0,'lastname':0,'email':0,'typeuser':0,'picture':0,'__v':0,'hashed_password':0,'created_at':0,'active':0,'code_act':0}, function(err, pbkey){
 	//user.findOne({email:e}, {'_id':0,'token':0,'name':0,'lastname':0,'email':0,'typeuser':0,'salt':0,'__v':0,'hashed_password':0}, function(err, pbkey){
 	 
 		if (err) return res.status(500).send(err.message)
@@ -167,7 +168,7 @@ exports.getEmailUserById = (req, res) => {
 	// var email = req.params.email
 	console.log('POST /users/getEmail/${id}')
 	
-	user.findById(id, {'_id':0,'name':0,'lastname':0,'typeuser':0,'picture':0,'__v':0,'password':0,'publickey':0}, function(err, emayl){
+	user.findById(id, {'_id':0,'name':0,'lastname':0,'typeuser':0,'picture':0,'__v':0,'hashed_password':0,'created_at':0,'active':0,'code_act':0,'publickey':0}, function(err, emayl){
 	//user.findById(id, {'_id':0,'token':0,'name':0,'lastname':0,'typeuser':0,'salt':0,'__v':0,'hashed_password':0,'publickey':0}, function(err, emayl){
 	 
 		if (err) return res.status(500).send(err.message)
@@ -206,9 +207,9 @@ exports.findAllSubjectsUser = (req, res) => {
 //GET - Return the profile from an user with his ID in the DB
 exports.findUserProfile = (req, res) => {
 	const id = req.params.id
-	console.log('POST /getProfile/${id}')
+	console.log('POST /users/getProfile/${id}')
 
-	user.findById(id, {'_id':0,'name':1,'lastname':1,'typeuser':0,'picture':1,'__v':0,'password':0,'created_at':1,'publickey':0}, function(err, userp){
+	user.findById(id, {'_id':0,'__v':0,'hashed_password':0,'active':0,'code_act':0,'publickey':0}, function(err, userp){
  
 	  if (err) return res.status(500).send(err.message)
 	  if (!userp) return res.status(404).send({message:'Couldn´t find the profile'})
@@ -218,5 +219,28 @@ exports.findUserProfile = (req, res) => {
 	})
 	
 
+}
+
+// GET - Retutn all the assistances from a user in a subject with his ID in the BD
+exports.findUserAssistances = (req, res) => {
+	const id = req.params.id
+	const subjname = req.params.subjname
+	
+	var s = subjname.replace(/([A-Z])/g, " $1").trim();
+	console.log('POST /users/assistance/${id}/${subjname}')
+	
+	record.find({$or:[{'UserS' :id},{'UserP' : id}], 'subjname' : s}, {'_id':0,'__v':0,'UserP':0,'UserS':0}, function(err, records){
+
+	//record.find({'UserS' :id, 'UserP' : id, 'subjname' : s}, {'_id':0,'subjname':1,'session':1,'date':1,'useremail':1,'verefy':1}, function(err, records){
+		//find({ subj:s, grouppl:{ $in: array }, User :{$exists : true, $ne: null }},{'subj':0,'year':0,'profname':0,'profemail':0,'__v':0}).populate({path:'User',select:'email'}).exec(function (err, subjects){
+		//subject.find({'User' :id}, {'_id':0,'subj':1,'grouppl':1,'year':1,'profname':1,'profemail':1}, function(err, subjects){
+	
+	  if (err) return res.status(500).send(err.message)
+	  if (!record) return res.status(404).send({message:'There are no assistances.'})
+
+	  res.status(200).jsonp(records)
+	  
+	})
+	
 }
 

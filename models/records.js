@@ -9,16 +9,19 @@ const subjects = mongoose.model('subjects');
 
 const RecordSchema = Schema({
    
-	id_user : String,
-	id_subj : String,
+	id_userS : String,
+	id_userP : String,
 	subjname : String,
 	session : String,
-	date : Date,
+	grouppl : String,
+	//date : Date,
+	date : String,
 	useremail : String,
-	User : {type : mongoose.Schema.Types.ObjectId, ref: "users"},
+	UserS : {type : mongoose.Schema.Types.ObjectId, ref: "users"},
+	UserP : {type : mongoose.Schema.Types.ObjectId, ref: "users"},
 	Subj : {type : mongoose.Schema.Types.ObjectId, ref: "subjects"},
-	verify: String,
+	verify: String
 	
 });
 
-module.exports = mongoose.model('subjects', SubjectSchema);
+module.exports = mongoose.model('records', RecordSchema);
