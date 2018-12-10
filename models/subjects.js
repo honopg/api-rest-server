@@ -7,13 +7,18 @@ const users = mongoose.model('users');
 
 const SubjectSchema = Schema({
    
-	id_user : String,
+	//id_user : String,
 	subj : String,
-	grouppl : [String],
+	/*grouppl : [String],*/
 	year : String,
 	profname : String,
+	grouppl:[{
+		pl : String,
+		//alumnos : [String]
+		alumnos : [{type : mongoose.Schema.Types.ObjectId, ref: "users"}]
+	}],
 	profemail : String,
-	User : {type : mongoose.Schema.Types.ObjectId, ref: "users"}
+	UserP : {type : mongoose.Schema.Types.ObjectId, ref: "users"}
 	
 });
 

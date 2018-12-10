@@ -10,6 +10,7 @@ const UserSchema = Schema({
 	lastname : String,
 	typeuser : { type: String, enum: ['Alumno', 'Profesor']},
 	picture : String,
+	//picture : Buffer,
     email: { type: String, required : true, unique : true, lowercase: true},
     //password: {type: String,required : true},
 	hashed_password	: String,

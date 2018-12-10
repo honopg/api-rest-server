@@ -12,6 +12,7 @@ const RecordSchema = Schema({
 	id_userS : String,
 	id_userP : String,
 	subjname : String,
+	year     : String,
 	session : String,
 	grouppl : String,
 	//date : Date,

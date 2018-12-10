@@ -17,6 +17,8 @@ user.find({email: email},function(err,users){
 		const ident = users[0]._id;
 		const ocuppation = users[0].typeuser;
 		const hashed_password = users[0].hashed_password;
+		const name = users[0].name;
+		const lastname = users[0].lastname;
 			
 			if (act == 0 && code_act == null){
 				callback({'response':"Verify your account to be able to login",'res':false});
@@ -38,7 +40,7 @@ user.find({email: email},function(err,users){
 				
 			if (act == 1 && (code_act==null || code_act != null)) {
 				if(bcrypt.compareSync(password, hashed_password)){
-					callback({'response':"Login Sucess",'res':true,'ocupacion':ocuppation,'ident':ident});
+					callback({'response':"Login Sucess",'res':true,'ocupacion':ocuppation,'ident':ident, 'name':name,'lastname':lastname});
 					
 				}else{
 					callback({'response':"Invalid Password",'res':false});

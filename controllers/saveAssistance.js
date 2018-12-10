@@ -5,25 +5,37 @@ const user = require('../models/users');
 const subject = require('../models/subjects');
 const record = require('../models/records');
 
-exports.saveAssistance = function(id_userS,id_userP,subjname,session,grouppl,date,useremail,verify,callback) {
+exports.saveAssistance = function(id_userS, id_userP, subjname, year, session, grouppl, date, useremail, verify, callback) {
 	
 	//user.findById(id_userS, function(err,usersS){
-	user.find({'_id': id_userS},function(err,usersS){
-		subject.find({subj:subjname , User:usersS[0]._id},function(err,subjectsS){ 
+	user.find({'_id': id_userP},function(err,usersP){
+		subject.findOne({subj:subjname , year:year,  UserP:usersP[0]._id},function(err, subjectsP){ 
+		
+			if (subjectsP.length != 0){
+				for (var i=0; i< subjectsP.grouppl.length; i++){
+					for ( var j=0 ; j<	subjectsP.grouppl[i].alumnos.length ; j++){
+						if(subjectsP.grouppl[i].alumnos[j] == id_userS){
+							var userS = 1
+						}
+					}
+				}
 			
 			//user.findById(id_userP, function(err,usersP){
-			user.find({'_id': id_userP},function(err,usersP){
-				subject.find({subj:subjname , User:usersP[0]._id},function(err,subjectsP){ 
+			//user.find({'_id': id_userS},function(err,usersS){
+				//subject.find({subj:subjname , User:usersS[0]._id},function(err,subjectsS){ 
 				
-					if(usersS != 0 && subjectsS != 0 && usersP != 0 && subjectsP != 0){
+					//if(usersS != 0 && subjectsS != 0 && usersP != 0 && subjectsP != 0){
+					if(	usersP != 0 && userS == 1){
 						const newrecord = new record({	
 							subjname : subjname,
+							year    : year,
 							session : session,
 							grouppl : grouppl,
 							date : date,
 							useremail : useremail,
 							verify : verify,
-							UserS : usersS[0]._id,
+							//UserS : usersS[0]._id,
+							UserS : id_userS,
 							UserP : usersP[0]._id
 						});
 						
@@ -38,9 +50,9 @@ exports.saveAssistance = function(id_userS,id_userP,subjname,session,grouppl,dat
 					
 			
 					
-				});
-			});
-		
+				//});
+			//});
+			}
 		
 	
 		});

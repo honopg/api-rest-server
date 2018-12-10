@@ -70,13 +70,32 @@ exports.findAllSubjs = (req, res) => {
 
 }*/
 
-//GET - Return all  subjects from an user with his ID in the DB
-exports.findUserSubjs = (req, res) => {
+//GET - Return all  subjects from an user (Professor) with his ID in the DB
+exports.findUserPrSubjs = (req, res) => {
 	const id = req.params.id
-	console.log('POST /usersubjs/${id}')
+	console.log('POST /userprsubjs/${id}')
 
-	subject.find({'User' :id}, {'_id':0,'subj':1,'grouppl':1,'year':1,'profname':1,'profemail':1}, function(err, subjects){
+	//subject.find({'User' :id}, {'_id':0,'subj':1,'grouppl':1,'year':1,/*'profname':1,*/'profemail':1}, function(err, subjects){
+	subject.find({'UserP' :id}, {'_id':0,'profname':0,'grouppl._id':0,'__v':0,'grouppl.alumnos':0,'UserP':0}, function(err, subjects){	
  
+	  if (err) return res.status(500).send(err.message)
+	  if (!subject) return res.status(404).send({message:'There are no subjects for that user'})
+
+	  res.status(200).jsonp(subjects)
+
+	})
+	
+
+}
+
+//GET - Return all  subjects from an user (Students) with his ID in the DB
+exports.findUserStSubjs = (req, res) => {
+	const id = req.params.id
+	console.log('POST /userstsubjs/${id}')
+
+	//subject.find({'grouppl.alumnos' : id}, {'_id':0,'grouppl._id':0,'__v':0,'UserP':0 /*,'grouppl.alumnos':0*/}, function(err, subjects){	
+	//subject.find({'grouppl.alumnos' : id}, {'_id':0,'subj':1,'year':1,'profname':1,'profemail':1,'grouppl.$':1 /*,'grouppl.alumnos':0*/}, function(err, subjects){	
+	subject.find({'grouppl.alumnos' : id}, {grouppl: {$elemMatch: {alumnos:id}}, '_id':0,'grouppl._id':0,'__v':0,'UserP':0 ,'grouppl.alumnos':0}, function(err, subjects){
 	  if (err) return res.status(500).send(err.message)
 	  if (!subject) return res.status(404).send({message:'There are no subjects for that user'})
 
@@ -240,6 +259,99 @@ exports.findUserAssistances = (req, res) => {
 
 	  res.status(200).jsonp(records)
 	  
+	})
+	
+}
+
+// GET - Find subjects in the data base by name of the subject and email of the professor
+exports.findSubjects = (req, res) => {
+	
+	const subjname = req.params.subjname
+	const email = req.params.email
+	const s = '@uniovi.es';
+	
+	console.log('POST /userFindSubjs/${subjname}/${email}/')	
+
+	if (  email != null || email != undefined){
+		const emailprof = email+s;
+		subject.find({'subj' :{$regex:subjname, $options: "si"} , 'profemail' :emailprof }, {'_id':0,'__v':0}, function(err, subje){
+	
+		if (err) return res.status(500).send(err.message)
+		if (!subje) return res.status(404).send({message:'There are no subjects.'})
+
+	  res.status(200).jsonp(subje)
+	  
+		})
+	} else {
+		
+		subject.find({'subj' :{$regex:subjname, $options: "si"} }, {'_id':0,'__v':0}, function(err, subjec){
+	
+		if (err) return res.status(500).send(err.message)
+		if (!subjec) return res.status(404).send({message:'There are no subjects.'})
+
+		res.status(200).jsonp(subjec)
+	  
+		})
+		
+	}
+	
+	//var subjn = subjname.replace(/([A-Z])/g, " $1").trim();
+	
+	
+}
+
+exports.findSubjs = function(subj,profemail, callback) {
+
+	if (  profemail.length != 0 && profemail != null && profemail != undefined /*&& !profemail.isEmpty()*/ ){
+		
+		subject.find({'subj' :{$regex:subj, $options: "si"} , 'profemail' :profemail }, {'_id':0,'__v':0,'grouppl.alumnos':0,'grouppl._id':0, 'UserP':0, 'profname':0}, function(err, subjec){
+			if (subjec.length == 0){
+				callback("No subjects found")
+			} else{
+				callback({subjec});
+			}
+		})
+	} else{
+		subject.find({'subj' :{$regex:subj, $options: "si"} }, {'_id':0,'__v':0,'grouppl.alumnos':0,'grouppl._id':0, 'UserP':0, 'profname':0}, function(err, subjec){
+			if (subjec.length == 0){
+				callback("No subjects found")
+			} else{
+				callback({subjec});
+			}
+		})
+		
+	}
+
+}
+
+// UPDATE - Subscribe a student to a PL group of a subject 
+
+exports.subscribeSubjs = function(subj, profemail, pl, year, alumnos, callback) {
+
+	subject.findOne({'subj' :{$regex:subj, $options: "si"} , 'profemail' :profemail, 'year' : year}, {'_id':0,'__v':0}, function(err, subjec){
+		
+		if (subjec.length != 0){
+			
+			for (var i=0; i< subjec.grouppl.length; i++){
+				 for ( var j=0 ; j<	subjec.grouppl[i].alumnos.length ; j++){
+					if(subjec.grouppl[i].alumnos[j] == alumnos){
+						var f = 1
+					}
+				 }
+			}
+			
+			if( f ==  1){
+				callback("You are already subscribed to a group.")
+			}
+			else{
+				// $set os $push
+				subject.update({'grouppl.pl':pl},{$addToSet:{"grouppl.$.alumnos":alumnos}},function(err,subj){ 
+					callback("You have subscribed correctly.")
+				})
+			}
+		} else{
+			callback("No subjects found.");
+		}
 	})
 	
 }

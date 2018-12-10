@@ -13,6 +13,10 @@ const userCtrl = require('../controllers/user');
 const savepicture = require ('../controllers/saveProfilePicture');
 const saveAssistance = require ('../controllers/saveAssistance');
 
+const user = require('../models/users');
+const subject = require('../models/subjects');
+const record = require('../models/records');
+
 
 //Return all users in the DB
 api.get('/users', queriesCtrl.findAllUsers)
@@ -25,9 +29,12 @@ api.get('/subjs', queriesCtrl.findAllSubjs)
 // Return all  subjects with specified ID in the DB
 //api.get('/subjs/:id', queriesCtrl.findSubjByID)
 
-//Return all  subjects from an user with his ID in the DB
-api.post('/usersubjs/:id', queriesCtrl.findUserSubjs)
+//Return all  subjects from an user (professor) with his ID in the DB
+api.post('/userprsubjs/:id', queriesCtrl.findUserPrSubjs)
 	//users.route('/users/api/subj/:id').post(list.findUserSubj)
+
+//Return all  subjects from an user (student) with his ID in the DB
+api.post('/userstsubjs/:id', queriesCtrl.findUserStSubjs)
 	
 //Return all users from a specific PL group of a subject
 api.post('/users/list/:subj/:group', queriesCtrl.findUsersByPlGroupSubj)
@@ -57,8 +64,11 @@ api.get('/subjects', queriesCtrl.findAllSubjectsUser)
 //Return the profile from an user with his ID in the DB
 api.post('/users/getProfile/:id', queriesCtrl.findUserProfile)
 
-//Retutn all the assistances from a user in a subject with his ID in the BD
+//Return all the assistances from a user in a subject with his ID in the BD
 api.post('/users/assistance/:id/:subjname', queriesCtrl.findUserAssistances)
+
+// Return subjects from the data base by name of the subject and email of the professor
+api.post('/userFindSubjs/:subjname/:email?', queriesCtrl.findSubjects)
 
 api.get('/private',auth, function(req, res) {
 	res.stauts(200).send({message: 'You have access'})
@@ -144,20 +154,115 @@ api.post('/saveUserProfilePicture',function(req,res){
 });
 	
 api.post('/saveAssistance',function(req,res){
-	
+		
 		const 	id_userS = req.body.id_userS;
 		const 	id_userP = req.body.id_userP;
 		const 	subjname = req.body.subjname;
+		const   year    = req.body.year;
 		const	session = req.body.session;
 		const	grouppl = req.body.grouppl;
 		const	date = req.body.date;
 		const	useremail = req.body.useremail;
 		const	verify = req.body.verify;
 
-		saveAssistance.saveAssistance(id_userS,id_userP,subjname,session,grouppl,date,useremail,verify,function (found) {
+		saveAssistance.saveAssistance(id_userS, id_userP, subjname, year, session, grouppl, date, useremail, verify,function (found) {
             console.log(found);
             res.json(found);
 		});
+});
+
+api.post('/userFindSubjs',function(req,res){
+	
+		const 	subj = req.body.subj;
+		const 	profemail = req.body.profemail;
+		
+
+		queriesCtrl.findSubjs(subj,profemail,function (found) {
+            console.log(found);
+            res.json(found);
+		});
+});
+
+// FUNCIONANDO
+api.post('/userFindSubj', (req, res) => {
+	
+		const 	subj = req.body.subj;
+		const 	profemail = req.body.profemail;
+		
+		if (  profemail.length != 0 && profemail != null && profemail != undefined /*&& !profemail.isEmpty()*/ ){
+		
+		subject.find({'subj' :{$regex:subj, $options: "si"} , 'profemail' :profemail }, {'_id':0,'__v':0,'grouppl.alumnos':0,'grouppl._id':0, 'UserP':0, 'profname':0}, function(err, subjec){
+			if (err) return res.status(500).send(err.message)
+			if (!subjec) return res.status(404).send({message:'No subjects found.'})
+			res.status(200).jsonp(subjec)
+		})
+	} else{
+		subject.find({'subj' :{$regex:subj, $options: "si"} }, {'_id':0,'__v':0,'grouppl.alumnos':0,'grouppl._id':0, 'UserP':0, 'profname':0}, function(err, subjec){
+			if (err) return res.status(500).send(err.message)
+			if (!subjec) return res.status(404).send({message:'No subjects found.'})
+			res.status(200).jsonp(subjec)
+		})
+		
+	}
+		
+});
+
+api.post('/subscribeSubjUser',function(req,res){
+	
+		const 	subj = req.body.subj;
+		const 	profemail = req.body.profemail;
+		const   pl = req.body.pl;
+		const   year = req.body.year;
+		const   alumnos = req.body.alumnos;
+		
+
+		queriesCtrl.subscribeSubjs(subj,profemail,pl,year, alumnos,function (found) {
+            console.log(found);
+            res.json(found);
+		});
+});
+
+// GET ASSISTANCES
+api.post('/users/assistance', (req, res) => {
+	
+		const id = req.body.id
+		const subjname = req.body.subjname
+		const year = req.body.year
+		
+		console.log('POST /users/assistance/')
+		
+		record.find({$or:[{'UserS' :id},{'UserP' : id}], 'subjname' : subjname, 'year': year}, {'_id':0,'__v':0,'UserP':0,'UserS':0}, function(err, records){
+			if (err) return res.status(500).send(err.message)
+			if (!record) return res.status(404).send({message:'There are no assistances.'})
+
+			res.status(200).jsonp(records)
+		
+		
+		})
+		
+});
+
+// GET STUDENT EMAILS OF THE GROUPS FROM A SPECIFIC SUBJECT 
+
+api.post('/users/list/emails', (req, res) => {
+	
+		const subj = req.body.subj
+		const year = req.body.year
+		const profemail = req.body.profemail
+		
+		console.log('POST /users/list/emails/')
+		
+		//subject.find({'subj' :subj, 'profemail' : profemail, 'year': year }, {'_id':0, '__v':0, 'subj':0, 'year':0,'grouppl._id':0, 'UserP':0, 'profemail':0, 'profname':0}, function(err, subjects){
+		subject.find({'subj' :subj, 'profemail' : profemail, 'year': year }, {'_id':0, '__v':0, 'subj':0, 'year':0,'grouppl._id':0, 'UserP':0, 'profemail':0, 'profname':0}).populate({path:'grouppl.alumnos',select:'email-_id'}).exec(function (err, subjects){
+			
+			if (err) return res.status(500).send(err.message)
+			//if (!subject) return res.status(404).send({message:'There are no users in that group'})
+
+			res.status(200).jsonp(subjects)
+		
+		
+		})
+		
 });
 	
 module.exports = api ;
