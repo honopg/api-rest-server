@@ -76,7 +76,26 @@ exports.findUserPrSubjs = (req, res) => {
 	console.log('POST /userprsubjs/${id}')
 
 	//subject.find({'User' :id}, {'_id':0,'subj':1,'grouppl':1,'year':1,/*'profname':1,*/'profemail':1}, function(err, subjects){
-	subject.find({'UserP' :id}, {'_id':0,'profname':0,'grouppl._id':0,'__v':0,'grouppl.alumnos':0,'UserP':0}, function(err, subjects){	
+	subject.find({'UserP' :id}, {'_id':0,'profname':0,'grouppl._id':0,'grouppl.total':0,'grouppl.session':0/*,'sessions':0*/,'__v':0,'grouppl.alumnos':0,'UserP':0}, function(err, subjects){	
+ 
+	  if (err) return res.status(500).send(err.message)
+	  if (!subject) return res.status(404).send({message:'There are no subjects for that user'})
+
+	  res.status(200).jsonp(subjects)
+
+	})
+	
+
+}
+
+//GET - Return all  subjects of a Year from an user (Professor) with his ID in the DB
+exports.findUserPrSubjsYear = (req, res) => {
+	const id = req.params.id
+	const year = req.params.year
+	console.log('POST /userprsubjs/${id}/$(year)')
+
+	//subject.find({'User' :id}, {'_id':0,'subj':1,'grouppl':1,'year':1,/*'profname':1,*/'profemail':1}, function(err, subjects){
+	subject.find({'UserP' :id, 'year':year}, {'_id':0,'profname':0,'grouppl._id':0,'grouppl.total':0,'grouppl.session':0/*,'sessions':0*/,'__v':0,'grouppl.alumnos':0,'UserP':0}, function(err, subjects){	
  
 	  if (err) return res.status(500).send(err.message)
 	  if (!subject) return res.status(404).send({message:'There are no subjects for that user'})
@@ -95,7 +114,26 @@ exports.findUserStSubjs = (req, res) => {
 
 	//subject.find({'grouppl.alumnos' : id}, {'_id':0,'grouppl._id':0,'__v':0,'UserP':0 /*,'grouppl.alumnos':0*/}, function(err, subjects){	
 	//subject.find({'grouppl.alumnos' : id}, {'_id':0,'subj':1,'year':1,'profname':1,'profemail':1,'grouppl.$':1 /*,'grouppl.alumnos':0*/}, function(err, subjects){	
-	subject.find({'grouppl.alumnos' : id}, {grouppl: {$elemMatch: {alumnos:id}}, '_id':0,'grouppl._id':0,'__v':0,'UserP':0 ,'grouppl.alumnos':0}, function(err, subjects){
+	subject.find({'grouppl.alumnos' : id}, {grouppl: {$elemMatch: {alumnos:id}}, '_id':0,'grouppl._id':0,'grouppl.session':0,'grouppl.total':0,'sessions':0,'__v':0,'UserP':0 ,'grouppl.alumnos':0}, function(err, subjects){
+	  if (err) return res.status(500).send(err.message)
+	  if (!subject) return res.status(404).send({message:'There are no subjects for that user'})
+
+	  res.status(200).jsonp(subjects)
+
+	})
+	
+
+}
+
+//GET - Return all  subjects of a Year from an user (Students) with his ID in the DB
+exports.findUserStSubjsYear = (req, res) => {
+	const id = req.params.id
+	const year = req.params.year
+	console.log('POST /userstsubjs/${id}/$(year)')
+
+	//subject.find({'grouppl.alumnos' : id}, {'_id':0,'grouppl._id':0,'__v':0,'UserP':0 /*,'grouppl.alumnos':0*/}, function(err, subjects){	
+	//subject.find({'grouppl.alumnos' : id}, {'_id':0,'subj':1,'year':1,'profname':1,'profemail':1,'grouppl.$':1 /*,'grouppl.alumnos':0*/}, function(err, subjects){	
+	subject.find({'grouppl.alumnos' : id, 'year':year}, {grouppl: {$elemMatch: {alumnos:id}}, '_id':0,'grouppl._id':0,'grouppl.session':0,'grouppl.total':0,'sessions':0,'__v':0,'UserP':0 ,'grouppl.alumnos':0}, function(err, subjects){
 	  if (err) return res.status(500).send(err.message)
 	  if (!subject) return res.status(404).send({message:'There are no subjects for that user'})
 
@@ -142,6 +180,23 @@ exports.deleteUserSubj = (req, res) => {
         	if (err) return res.status(500).send(err.message)
       		
       		res.status(200).jsonp({message: 'Subject deleted'})
+        })
+    })
+}
+
+//DELETE - Delete an Assistance with specified ID 
+exports.deleteAssistance = (req, res) => {
+    const id = req.params.id
+    console.log(`DELETE /users/assist/${id}`)
+
+    record.findById(id, (err, records) => {
+
+    		if (!record) return res.status(404).send({message: 'Asssistance not saved'})
+
+        records.remove( (err) => {
+        	if (err) return res.status(500).send(err.message)
+      		
+      		res.status(200).jsonp({message: 'Assistance deleted'})
         })
     })
 }
@@ -304,7 +359,7 @@ exports.findSubjs = function(subj,profemail, callback) {
 
 	if (  profemail.length != 0 && profemail != null && profemail != undefined /*&& !profemail.isEmpty()*/ ){
 		
-		subject.find({'subj' :{$regex:subj, $options: "si"} , 'profemail' :profemail }, {'_id':0,'__v':0,'grouppl.alumnos':0,'grouppl._id':0, 'UserP':0, 'profname':0}, function(err, subjec){
+		subject.find({'subj' :{$regex:subj, $options: "si"} , 'profemail' :profemail }, {'_id':0,'__v':0,'grouppl.alumnos':0,'grouppl.total':0,'grouppl.session':0,'sessions':0,'grouppl._id':0, 'UserP':0, 'profname':0}, function(err, subjec){
 			if (subjec.length == 0){
 				callback("No subjects found")
 			} else{
@@ -312,7 +367,7 @@ exports.findSubjs = function(subj,profemail, callback) {
 			}
 		})
 	} else{
-		subject.find({'subj' :{$regex:subj, $options: "si"} }, {'_id':0,'__v':0,'grouppl.alumnos':0,'grouppl._id':0, 'UserP':0, 'profname':0}, function(err, subjec){
+		subject.find({'subj' :{$regex:subj, $options: "si"} }, {'_id':0,'__v':0,'grouppl.alumnos':0,'grouppl.session':0,'sessions':0,'grouppl._id':0,'grouppl.total':0, 'UserP':0, 'profname':0}, function(err, subjec){
 			if (subjec.length == 0){
 				callback("No subjects found")
 			} else{
@@ -327,32 +382,72 @@ exports.findSubjs = function(subj,profemail, callback) {
 // UPDATE - Subscribe a student to a PL group of a subject 
 
 exports.subscribeSubjs = function(subj, profemail, pl, year, alumnos, callback) {
-
-	subject.findOne({'subj' :{$regex:subj, $options: "si"} , 'profemail' :profemail, 'year' : year}, {'_id':0,'__v':0}, function(err, subjec){
+	//{$regex:subj, $options: "si"}
+	subject.find({'subj' : subj, 'year' : year, 'grouppl.alumnos' : alumnos }, function(err, result){ 
 		
-		if (subjec.length != 0){
+		if (result !== undefined && result.length !=0){
+			callback("You are already subscribed to a group for this subject.")
+		} else {
+			subject.findOne({'subj' : subj , 'profemail' :profemail, 'year' : year}, {/*'_id':0,*/'__v':0}, function(err, subjec){
+				// Puede quitarse el if
+				if (subjec.length != 0){
 			
-			for (var i=0; i< subjec.grouppl.length; i++){
-				 for ( var j=0 ; j<	subjec.grouppl[i].alumnos.length ; j++){
-					if(subjec.grouppl[i].alumnos[j] == alumnos){
-						var f = 1
+					for (var i=0; i< subjec.grouppl.length; i++){
+						for ( var j=0 ; j<	subjec.grouppl[i].alumnos.length ; j++){
+							if(subjec.grouppl[i].alumnos[j] == alumnos){
+							var f = 1
+							}
+						}
 					}
-				 }
-			}
 			
-			if( f ==  1){
-				callback("You are already subscribed to a group.")
-			}
-			else{
-				// $set os $push
-				subject.update({'grouppl.pl':pl},{$addToSet:{"grouppl.$.alumnos":alumnos}},function(err,subj){ 
-					callback("You have subscribed correctly.")
-				})
-			}
-		} else{
-			callback("No subjects found.");
+					if( f ==  1){
+						callback("You are already subscribed to a group.")
+					}
+					else{
+						// $push or $addToSet
+						subject.update({'_id': subjec._id, 'grouppl.pl':pl},{$addToSet:{"grouppl.$.alumnos":alumnos},$inc :{"grouppl.$.total" : 1}},function(err,subj){ 
+						
+							callback("You have subscribed correctly.")
+						})
+					}
+				} else{
+					callback("No subjects found.");
+				}
+			})
 		}
+	
 	})
 	
 }
+
+
+// DELETE - Delete a student´s email from the PL group  from the professor´s list
+
+exports.deleteStudentEmail = function(subj, profemail, year, stuemail, callback) {
+	
+	user.find({'email' : stuemail }, {'_id':1}, function(err, student){ 
+		subject.find({'grouppl.alumnos' : student[0]._id, 'profemail' :profemail, 'year':year, 'subj' : subj }, {grouppl: {$elemMatch: {alumnos:student[0]._id}},/* '_id':0,'grouppl._id':0,*/'__v':0/*,'UserP':0 ,'grouppl.alumnos':0*/}, function(err, result){
+			
+			//var pl = result[0].grouppl[0].pl)
+			if (result !== undefined && result.length !=0){
+				subject.findOne({'subj' : subj , 'profemail' :profemail, 'year' : year}, {'__v':0}, function(err, subjec){ 
+					if (subjec.length != 0){ 
+						subject.update({'_id':result[0]._id,'grouppl.alumnos':student[0]._id},{$pull: {"grouppl.$.alumnos": student[0]._id  },$inc :{"grouppl.$.total" : -1}},function(err, subj){ 
+							
+							callback("The student has been eliminated correctly.")
+						})
+
+					} else {
+						callback("Error when removing the student.")
+					}
+				})
+			} else {
+				callback("That student is no longer available.")
+			}	
+		})
+	})
+	
+}
+
+
 

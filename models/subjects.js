@@ -11,9 +11,13 @@ const SubjectSchema = Schema({
 	subj : String,
 	/*grouppl : [String],*/
 	year : String,
+	//session : String,
+	sessions : String,
 	profname : String,
 	grouppl:[{
 		pl : String,
+		session : String,
+		total : Number, 
 		//alumnos : [String]
 		alumnos : [{type : mongoose.Schema.Types.ObjectId, ref: "users"}]
 	}],

@@ -13,15 +13,17 @@ const RecordSchema = Schema({
 	id_userP : String,
 	subjname : String,
 	year     : String,
-	session : String,
+	NumSession : String,
 	grouppl : String,
-	//date : Date,
-	date : String,
+	date : Date,
+	//date : String,
 	useremail : String,
 	UserS : {type : mongoose.Schema.Types.ObjectId, ref: "users"},
 	UserP : {type : mongoose.Schema.Types.ObjectId, ref: "users"},
 	Subj : {type : mongoose.Schema.Types.ObjectId, ref: "subjects"},
-	verify: String
+	verify: String,
+	dSignSt : String,
+	dSignPr : String,
 	
 });
 

@@ -7,7 +7,7 @@ const subject = require('../models/subjects');
 //const users = mongoose.model('users');
 //const subjects = mongoose.model('subjects');
 
-exports.saveSubj = function(id_user,subj,grouppl,year,profname,profemail,callback) {
+exports.saveSubj = function(id_user,subj,grouppl,year,profname,profemail,sessions,callback) {
 
 
 	//user.find({token: id_user},function(err,users){
@@ -21,6 +21,7 @@ exports.saveSubj = function(id_user,subj,grouppl,year,profname,profemail,callbac
 				subj : subj/*.replace(/\s/g, "")*/,
 				grouppl : grouppl, 
 				year : year,
+				sessions : sessions,
 				profname : profname,
 				profemail : profemail,
 				UserP : users[0]._id
