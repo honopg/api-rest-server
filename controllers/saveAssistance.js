@@ -5,7 +5,7 @@ const user = require('../models/users');
 const subject = require('../models/subjects');
 const record = require('../models/records');
 
-exports.saveAssistance = function(id_userS, id_userP, subjname, year, session, grouppl, /*date,*/ useremail, verify, dSignSt, dSignPr, callback) {
+exports.saveAssistance = function(id_userS, id_userP, subjname, year, session, grouppl, date, useremail, verify, dSignSt, dSignPr, callback) {
 	
 	
 subject.find({'subj':subjname, 'year':year, 'UserP': id_userP, 'grouppl.alumnos': id_userS}, function(err, result) {
@@ -16,8 +16,8 @@ subject.find({'subj':subjname, 'year':year, 'UserP': id_userP, 'grouppl.alumnos'
 			year         : year,
 			NumSession   : session,
 			grouppl      : grouppl,
-			//date         : date,
-			date       : new Date(),
+			date         : date,
+			//date       : new Date(),
 			useremail    : useremail,
 			verify       : verify,
 			dSignSt      : dSignSt,

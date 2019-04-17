@@ -172,13 +172,13 @@ api.post('/saveAssistance',function(req,res){
 		const   year    = req.body.year;
 		const	session = req.body.session;
 		const	grouppl = req.body.grouppl;
-		//const	date = req.body.date;
+		const	date = req.body.date;
 		const	useremail = req.body.useremail;
 		const	verify = req.body.verify;
 		const   dSignSt = req.body.dSignSt;
 		const   dSignPr = req.body.dSignPr;
 
-		saveAssistance.saveAssistance(id_userS, id_userP, subjname, year, session, grouppl, /*date,*/ useremail, verify, dSignSt, dSignPr,function (found) {
+		saveAssistance.saveAssistance(id_userS, id_userP, subjname, year, session, grouppl, date, useremail, verify, dSignSt, dSignPr,function (found) {
             console.log(found);
             res.json(found);
 		});
@@ -313,6 +313,27 @@ api.post('/users/assistancest', (req, res) => {
 			
 		}
 		
+	
+});
+
+api.post('/users/assistancesst', (req, res) => {
+	
+		const id = req.body.id
+		const subjname = req.body.subjname
+		const year = req.body.year
+		const group = req.body.grouppl
+			
+		console.log('POST /users/assistancesst/')
+		
+			record.find({'subjname':subjname, 'year':year, 'grouppl':group, 'UserS':id},{'_id':0,'subjname':0,'year':0,'grouppl':0,'useremail':0,'UserP':0,'UserS':0/*,'Subj':0*/,'__v':0}).populate({path: 'Subj', select: 'sessions-_id'}).exec(function(err, records){
+			//record.find({'subjname':subjname, 'year':year, 'grouppl':group, 'UserS':id},{'_id':0,'subjname':0,'year':0,'grouppl':0,'useremail':0,'UserP':0,'UserS':0,'Subj':0,'__v':0}, function(err, records){
+				
+				if (err) return res.status(500).send(err.message)
+				if (!record) return res.status(404).send({message:'There are no assistances.'})
+
+				res.status(200).jsonp(records)
+			
+			})	
 	
 });
 
@@ -458,6 +479,27 @@ api.post('/users/assistancepr', (req, res) => {
 	
 });
 
+api.post('/users/assistancespr', (req, res) => {
+	
+		const id = req.body.id
+		const subjname = req.body.subjname
+		const year = req.body.year
+		const group = req.body.grouppl
+		
+		console.log('POST /users/assistancespr/')
+		
+			record.find({'subjname':subjname, 'year':year, 'grouppl':group, 'UserP':id},{'_id':0,'subjname':0,'year':0,'grouppl':0,'useremail':0,'UserP':0/*,'UserS':0*/,'Subj':0,'__v':0}).populate({path: 'UserS', select: 'name lastname email -_id'}).exec(function(err, records){
+				
+				if (err) return res.status(500).send(err.message)
+				if (!record) return res.status(404).send({message:'There are no assistances.'})
+
+				res.status(200).jsonp(records)
+				
+			})
+		
+	
+});
+
 
 
 // GET STUDENT EMAILS OF THE GROUPS FROM A SPECIFIC SUBJECT 
@@ -485,7 +527,7 @@ api.post('/users/list/emails', (req, res) => {
 
 // GET STUDENT EMAILS,NAMES AND LASTNAMES OF THE GROUPS FROM A SPECIFIC SUBJECT 
 
-api.post('/users/list/emailss', (req, res) => {
+/*api.post('/users/list/emailss', (req, res) => {
 	
 		const subj = req.body.subj
 		const year = req.body.year
@@ -498,6 +540,49 @@ api.post('/users/list/emailss', (req, res) => {
 			
 			if (err) return res.status(500).send(err.message)
 			//if (!subject) return res.status(404).send({message:'There are no users in that group'})
+
+			res.status(200).jsonp(subjects)
+		
+		
+		})
+		
+});*/
+
+api.post('/users/list/emailss', (req, res) => {
+	
+		const subj = req.body.subj
+		const year = req.body.year
+		const profemail = req.body.profemail
+		const grpl = req.body.grpl
+		const id = req.body.ident
+		
+		console.log('POST /users/list/emails/')
+		
+		subject.find({'subj' :subj, 'profemail' : profemail, 'year': year, 'grouppl.pl': grpl }, {grouppl: {$elemMatch: {pl:grpl}},'_id':0, '__v':0, 'subj':0, 'year':0,'grouppl._id':0,'grouppl.total':0,'grouppl.session':0,'sessions':0, 'UserP':0, 'profemail':0, 'profname':0}).populate({path:'grouppl.alumnos',select:'email name lastname-_id'}).exec(function (err, subjects){
+		//record.find({'subjname':subj, 'year':year, 'grouppl':grpl, 'UserP':id},{'_id':0,'subjname':0, 'NumSession':0, 'date': 0, 'dSignSt':0, 'dSignPr':0, 'year':0/*,'grouppl':0,'useremail':0*/,'UserP':0/*,'UserS':0*//*,'Subj':0*/,'__v':0}).exec(function(err, subjects){	
+			if (err) return res.status(500).send(err.message)
+			//if (!subject) return res.status(404).send({message:'There are no users in that group'})
+
+			res.status(200).jsonp(subjects)
+		
+		
+		})
+		
+});
+
+// GET STUDENT ASSISTS
+api.post('/users/list/assists', (req, res) => {
+	
+		const subj = req.body.subj
+		const year = req.body.year
+		const grpl = req.body.grpl
+		const id = req.body.ident
+		
+		console.log('POST /users/list/emails/')
+		
+		record.find({'subjname':subj, 'year':year, 'grouppl':grpl, 'UserP':id},{'_id':0,'subjname':0, 'NumSession':0, 'date': 0, 'dSignSt':0, 'dSignPr':0, 'year':0,'grouppl':0/*,'useremail':0*/,'UserP':0/*,'UserS':0*/,'Subj':0,'__v':0}).exec(function(err, subjects){	
+			if (err) return res.status(500).send(err.message)
+			//if (!subject) return res.status(404).send({message:'There are no assists'})
 
 			res.status(200).jsonp(subjects)
 		
